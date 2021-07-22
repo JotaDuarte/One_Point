@@ -2,30 +2,45 @@ from datetime import datetime
 import PySimpleGUI as sg
 import openpyxl as ox
 
+cod = {'1': 'julio','2': 'luciene', '3': 'duarte'}
 
 def pass_for_excel(COD):
     fileExcel = ox.load_workbook('./Testes/registroPonto.xlsx')
     pl = fileExcel.active
     size_list = len(pl['A'])
+    
+    timeRegistered = datetime.now().strftime('%H:%M:%S')
+    date = datetime.now().strftime('%d/%m/%y')
 
-    for i in range((size_list+1), (size_list+2)):
+    for i in range(2, (size_list+2)):
         A = f'A{i}'
         B = f'B{i}'
         C = f'C{i}'
         D = f'D{i}'
         E = f'E{i}'
         F = f'F{i}'
-        pl[A].value = COD
-        pl[B].value = cod[COD]
-        if pl[C].value == None:
-            pl[C].value = timeRegistered
-        elif pl[D].value == None:
+        G = f'G{i}'
+        
+        if pl[A].value == None:
+            pl[A].value = date
+            pl[B].value = COD
+            pl[C].value = cod[COD]
             pl[D].value = timeRegistered
-        elif pl[E].value == None:
-            pl[E].value = timeRegistered
-        elif pl[F].value == None:
-            pl[F].value = timeRegistered
-        fileExcel.save('./Testes/registroPonto.xlsx')
+        elif pl[B].value == COD:
+            if pl[E].value == None:
+                pl[E].value = timeRegistered
+                break
+            elif pl[F].value == None:
+                pl[F].value = timeRegistered
+                break
+            elif pl[G].value == None:
+                pl[G].value = timeRegistered
+                break
+            elif pl[G].value != None:
+                pass
+
+    fileExcel.save('./Testes/registroPonto.xlsx')
+
 
 def first_screen():
     layout = [
@@ -35,15 +50,17 @@ def first_screen():
     return sg.Window('One Point', layout=layout, finalize=True,
     resizable=True, return_keyboard_events=True)
 
-timeNow = float(datetime.now().strftime('%H.%M'))
-timeRegistered = datetime.now().strftime('%H:%M')
-cod = {'1': 'julio','2': 'luciene'}
+
+def Time():
+    timeNow = float(datetime.now().strftime('%H.%M'))
+    return timeNow
 
 
 def registered_point():
-    if timeNow > 8.50 and timeNow < 21.10:
+    
+    if Time() > 8.50 and Time() < 21.10:
         win1, win2 = first_screen(), None
-        
+
         while True:
             window, event, value = sg.read_all_windows()
             
@@ -53,7 +70,6 @@ def registered_point():
             if window == win1 and event == 'ENV':
                 if value['COD'] in cod.keys():
                     registered = value['COD']
-                    #fazer função para registrar o ponto no excel e colocar aqui
                     pass_for_excel(registered)
                     sg.popup('Ponto Registrado')
                     window.FindElement('COD').Update('')
@@ -62,6 +78,7 @@ def registered_point():
                     sg.popup('Funcionario(a) não cadastrado(a)')
                     window.FindElement('COD').Update('')
         
-    elif timeNow < 8.50 or timeNow > 21.10:
+    elif Time() < 8.50 or Time() > 21.10:
         sg.popup('Fora da hora de funcionamento')
+
 registered_point()
